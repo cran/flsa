@@ -14,6 +14,7 @@
 #include "MaxFlowGraph.h"
 #include "Scheduler.h"
 #include "Groups.h"
+#include <vector>
 #include <set>
 
 
@@ -29,7 +30,11 @@ class FLSAGeneral
     double maxLambda;
     double tolerance;
     double maxGroupNumber;
-    
+
+    // remember how many iterations were needed for the maxFlowGraph
+    vector<int> mfgraphSize;
+    vector<int> mfgraphIter;
+
     // helper function for the constructor that performs the initialization of the groups
     void initializeGroups(SEXP startValues);
 

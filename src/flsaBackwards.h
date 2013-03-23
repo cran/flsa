@@ -38,7 +38,7 @@ class FLSABackwards {
     double* solution;
     
     set<int> solGroups;
-	set<double> solLambdas;
+    set<double> solLambdas;
     multimap<double, GroupInfo> groups;
 
     bool algRun;

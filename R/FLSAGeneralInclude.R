@@ -68,44 +68,55 @@ is.connListObj = function(obj)
 ######################################################################
 
 flsaTopDown <- function(y, lambda1=0, groups=1:length(y), lambda2=NULL) {
-	### check the input variables
-	if(!is.vector(y)) {
-		stop("y has to be a vector")
-	}
-	if(is.null(groups)) {
-		groups = numeric(0)
-	}
-	if(!is.vector(groups)) {
-		stop("Groups has to be a vector")
-	}
-	groups = as.integer(groups)
-	if(length(groups)>0 && min(groups)<1) {
-		warning("Number of groups should be >= 1")
-	}
-	if(length(groups)>0 && max(groups)> length(y)) {
-		warning("Number of groups should be <= length(y)")
-	}
-	if(is.null(lambda2)) {
-		lambda2 = numeric(0)
-	}
-	if(!is.vector(lambda2)) {
-		stop("lambda2 has to be a vector")
-	}
-	lambda2 = as.numeric(lambda2)
-	if(length(lambda2)>0 && min(lambda2) < 0) {
-		warning("Lambda2 should be greater then 0")
-	}
-	if(lambda1<0) {
-		stop("Lambda1 has to be >=0")
-	}
-	res = .Call("FLSATopDown", y, groups, lambda2)
-	if(lambda1 > 0) {
-		res$Solution = softThresholding(res$Solution, lambda1)
-	}
-	### make a few small changes to the results
-	res$Solution = t(res$Solution)
-	rownames(res$Solution) = res$Lambdas
-	return(res)
+  ## check the input variables
+  if(!is.vector(y) | !is.numeric(y)) {
+    stop("y has to be a numeric vector")
+  }
+  if(!is.double(y)) {
+    y <- as.double(y)
+  }
+  if(is.null(groups)) {
+    groups = numeric(0)
+  }
+  if(!is.vector(groups)) {
+    stop("Groups has to be a vector")
+  }
+  groups = as.integer(groups)
+  if(length(groups)>0 && min(groups)<1) {
+    warning("Number of groups should be >= 1")
+  }
+  if(length(groups)>0 && max(groups)> length(y)) {
+    warning("Number of groups should be <= length(y)")
+  }
+  if(is.null(lambda2)) {
+    lambda2 = numeric(0)
+  }
+  if(!is.vector(lambda2)) {
+    stop("lambda2 has to be a vector")
+  }
+  lambda2 = as.numeric(lambda2)
+  if(length(lambda2)>0 && min(lambda2) < 0) {
+    warning("Lambda2 should be greater than 0")
+  }
+  if(lambda1<0) {
+    stop("Lambda1 has to be >=0")
+  }
+  res = .Call("FLSATopDown", y, groups, lambda2)
+  if(lambda1 > 0) {
+    res$Solution = softThresholding(res$Solution, lambda1)
+  }
+  
+  ## make a few small changes to the results
+  res$Solution = t(res$Solution)
+  rownames(res$Solution) = res$Lambdas
+
+  ## remove duplicate values of lambda
+  lambda.not.duplicated <- !duplicated(round(res$Lambdas, 12))
+  res$Solution <- res$Solution[lambda.not.duplicated, , drop=FALSE]
+  res$Lambdas <- res$Lambdas[lambda.not.duplicated]
+  res$isBreakpoint <- res$isBreakpoint[lambda.not.duplicated]
+  
+  return(res)
 }
 
 
@@ -121,79 +132,68 @@ flsaTopDown <- function(y, lambda1=0, groups=1:length(y), lambda2=NULL) {
 ###
 ################################################################
 
-flsa = function(y, lambda1=0, lambda2=NULL, connListObj = NULL, splitCheckSize=1e9, verbose=FALSE, thr=10e-10, maxGrpNum=4*length(y))
-{
-    splitCheckSize=as.integer(splitCheckSize)
-    if(is.null(connListObj)) # call the appropriate method depending on dimension of y
-    {
-        if(is.vector(y)) ### call the basic FLSA
-        {
-            solObj = .Call("FLSA",y, PACKAGE="flsa")
-            if(!is.null(lambda2))
-            {
-                resLambda1Is0 = FLSAOneDimExplicitSolution(solObj,lambda2)
-                if(lambda1!=0)
-                {
-                    res = softThresholding(resLambda1Is0,lambda1)
-                    return(res)
-                }
-                else
-                {
-                    return(resLambda1Is0)
-                }
-            }
-            else
-            {
-                return(solObj)
-            }
+flsa = function(y, lambda1=0, lambda2=NULL, connListObj = NULL, splitCheckSize=1e9, verbose=FALSE, thr=10e-10, maxGrpNum=4*length(y)) {
+  splitCheckSize=as.integer(splitCheckSize)
+  if(is.null(connListObj)) { # call the appropriate method depending on dimension of y
+    if(is.vector(y)) { ## call the basic FLSA
+      if(!is.double(y)) { # y has to be REAL before passing it to C
+        y <- as.double(y)
+      }
+      solObj = .Call("FLSA",y, PACKAGE="flsa")
+      if(!is.null(lambda2)) {
+        resLambda1Is0 = FLSAOneDimExplicitSolution(solObj, lambda2)
+        if(lambda1!=0) {
+          res = softThresholding(resLambda1Is0, lambda1)
+          return(res)
         }
-        else if(is.matrix(y)) ### call the 2-dimensional FLSA
-        {
-            connListObj = connListTwoDimensions(dim(y))
-            ### check that everything is ok with lambda2
-            if(!is.null(lambda2))
-            {
-                lambda2 = checkLambda2(lambda2)
-                res=.Call("FLSAGeneralMain", connListObj, as.vector(y), lambda2, splitCheckSize, verbose, thr, as.integer(maxGrpNum), PACKAGE="flsa")  
-                
-                ### format the result in 2 dimensions
-                res= array(res, dim=c(length(lambda2), dim(y)))
-                ### reset the names of the dimensions
-                myDimNames = list(lambda2, 1:(dim(y)[1]), 1:(dim(y)[2]))
-                dimnames(res) = myDimNames
-                
-                ### take lambda1 into account if necessary
-                if(lambda1!=0)
-                {
-                    res = softThresholding(res, lambda1)
-                }
-            }
-            else
-            {
-                res=.Call("FLSAGeneralMain", connListObj, as.vector(y), lambda2, splitCheckSize, verbose,thr, as.integer(maxGrpNum), PACKAGE="flsa")
-            }
-            return(res)
+        else {
+          return(resLambda1Is0)
         }
+      }
+      else { # no lambda2 value, so just return solution object
+        return(solObj)
+      }
     }
-    else ### call the general FLSA with the connection list
-    {
-        if(!is.null(lambda2))
-        {
-            lambda2=checkLambda2(lambda2)
-        }
-        if(length(connListObj$nodes)!=length(y))
-        {
-            stop("y has to have the same number of nodes as connListObj")
-        }
-        res=.Call("FLSAGeneralMain", connListObj, as.vector(y), lambda2, splitCheckSize, verbose, thr, as.integer(maxGrpNum), PACKAGE="flsa")  
+    else if(is.matrix(y)) { ## call the 2-dimensional FLSA
+      connListObj = connListTwoDimensions(dim(y))
+      ## check that everything is ok with lambda2
+      if(!is.null(lambda2)) {
+        lambda2 = checkLambda2(lambda2)
+        res=.Call("FLSAGeneralMain", connListObj, as.double(y), lambda2, splitCheckSize, verbose,
+          thr, as.integer(maxGrpNum), PACKAGE="flsa")  
         
-        ### take lambda1 into account if necessary
-        if(!is.null(lambda2) && (lambda1!=0))
-        {
-            res = softThresholding(res, lambda1)
+        ## format the result in 2 dimensions
+        res= array(res, dim=c(length(lambda2), dim(y)))
+        ## reset the names of the dimensions
+        myDimNames = list(lambda2, 1:(dim(y)[1]), 1:(dim(y)[2]))
+        dimnames(res) = myDimNames
+        
+        ## take lambda1 into account if necessary
+        if(lambda1!=0) {
+          res = softThresholding(res, lambda1)
         }
-        return(res)
+      }
+      else {
+        res=.Call("FLSAGeneralMain", connListObj, as.double(y), lambda2, splitCheckSize, verbose,thr, as.integer(maxGrpNum), PACKAGE="flsa")
+      }
+      return(res)
     }
+  }
+  else {## call the general FLSA with the connection list
+    if(!is.null(lambda2)) {
+      lambda2=checkLambda2(lambda2)
+    }
+    if(length(connListObj)!=length(y)) {
+      stop("y has to have the same number of nodes as connListObj")
+    }
+    res=.Call("FLSAGeneralMain", connListObj, as.double(y), lambda2, splitCheckSize, verbose, thr, as.integer(maxGrpNum), PACKAGE="flsa")  
+    
+    ## take lambda1 into account if necessary
+    if(!is.null(lambda2) && (lambda1!=0)) {
+      res = softThresholding(res, lambda1)
+    }
+    return(res)
+  }
 }
 
 

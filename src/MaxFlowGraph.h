@@ -59,7 +59,7 @@ class MaxFlowGraph
     // finds the new label for node nodeNum
     int findDist(int nodeNum);
     // preprocess the graph; sets the distances from sink and pushes maximum flow from the source
-    void preprocess(const int sourceNode, const int sinkNode, ostream& outStream, bool output);
+    void preprocess(const int sourceNode, const int sinkNode, bool output);
     // push/relabel procedure; return value indicates if node is still active
     bool pushRelabel(const int i, const int sourceNode, const int sinkNode);
     // return the next largest active node; will return false if there are no more; node will be saved in nodeNum
@@ -89,10 +89,10 @@ class MaxFlowGraph
     void setFlowTo0(); // flow set to 0 everywhere
     
     // returns true if all edges from the sourceNode are at full capacity
-    bool findMaxFlow(const int sourceNode, const int sinkNode, ostream& outStream=cout, bool output=false); 
+    bool findMaxFlow(const int sourceNode, const int sinkNode, bool output=false); 
     
     // calculate until when the current flows are valid
-    double validUntil(ostream& outStream=cout, bool giveOutput=false);
+    double validUntil(bool giveOutput=false);
 
     // deletes all nodes in the graph; frees the edges from the source and sink
     void clear();
@@ -106,13 +106,13 @@ public:
     
     // calculates the derivative of the tension; return value gives the lambda value when it has to be recalculated
     // negative values can indicate that it has never to be recalculated or that the group has to be split (see constants above)
-    double calcTensionChange(const double lambda, ostream& outStream=cout, bool giveOutput=false);
+    double calcTensionChange(const double lambda, bool giveOutput=false);
     // while the previous function can be called any time, this function can only be called after the
     // previous function has been called at least once. However it is particularly efficient
     // at doing flow updates when a tension update is necessary because a boundary has been hit
-    double calcTensionChangeUpdate(const double lambda, ostream& outStream=cout, bool giveOutput=false);
+    double calcTensionChangeUpdate(const double lambda, bool giveOutput=false);
     // uses the proportional version of capacity setting to minimize the number of necessary tension calls
-    double calcTensionChangeProportional(const double lambda, ostream& outStream=cout, bool giveOutput=false);
+    double calcTensionChangeProportional(const double lambda, int& iterUsed, bool giveOutput=false);
     
     // returns a set of nodes that are reachable from the source with current flow
     set<int> reachableFromSource(const int sourceNode=source);
@@ -130,9 +130,9 @@ public:
     ~MaxFlowGraph();
 
     // prints out the whole graph; used for troubleshooting
-    void printGraph(ostream& outStream);
+    void printGraph();
     // prints the currently active nodes
-    void printActiveNodes(ostream& outStream);
+    void printActiveNodes();
     
 };
 

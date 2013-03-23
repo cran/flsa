@@ -143,7 +143,7 @@ pair<GroupInfo, GroupInfo> FLSABackwards::splitGroup(GroupInfo group) {
 
 
 // Constructor
-FLSABackwards::FLSABackwards(SEXP R_y, SEXP R_groups, SEXP R_lambdas):groups(),solGroups()
+FLSABackwards::FLSABackwards(SEXP R_y, SEXP R_groups, SEXP R_lambdas):solGroups(),groups()
 {
 	// first initialize the variables that we need
     n = LENGTH(R_y);
@@ -256,7 +256,7 @@ void FLSABackwards::runAlgorithm()
 		// set the current lambda value
 		curLambda = nextBreakpoint;
 		// no more work to do
-		if(groups.size() == n) {
+		if((int) groups.size() == n) {
 			break;
 		}
 

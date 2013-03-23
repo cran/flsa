@@ -45,8 +45,6 @@ void FLSAGeneral::initializeScheduler()
     set<int> curNode, connNodes,bar, connGroups;
     groupItem curGroupItem, connGroupItem;
     int curGroupNum;
-    double hitTime;
-    scheduleEvent schedEv;
     
     set<int>::iterator setIter, setIter2;
     // go through all nodes
@@ -92,9 +90,9 @@ double FLSAGeneral::calcHitTime(groupItem grp1, groupItem grp2)
     // rhs = (grp2.deriv-grp1.deriv)*(lambda-lambdaMax)
     if(showProgress)
     {
-        Rprintf("LHS: %f RHS: %f\n",lhs,slopeRhs);
-        Rprintf("Group 1: Lambda: %f Deriv: %f Size: %d\n", grp1.lambda, grp1.deriv, grp1.size);
-        Rprintf("Group 2: Lambda: %f Deriv: %f Size: %d\n", grp2.lambda, grp2.deriv, grp2.size);
+//        Rprintf("LHS: %f RHS: %f\n",lhs,slopeRhs);
+//        Rprintf("Group 1: Lambda: %f Deriv: %f Size: %d\n", grp1.lambda, grp1.deriv, grp1.size);
+//        Rprintf("Group 2: Lambda: %f Deriv: %f Size: %d\n", grp2.lambda, grp2.deriv, grp2.size);
     }
 
 //    if(RelDif(lhs,0)<tolerance) // lhs is 0, so hitting time is lambdaMax as groups on top of each other
@@ -106,7 +104,7 @@ double FLSAGeneral::calcHitTime(groupItem grp1, groupItem grp2)
         int rhsSign = signum(slopeRhs);
         if(showProgress)
         {
-            Rprintf("FlowSign: %d; rhsSign: %d", flowSign, rhsSign);
+//            Rprintf("FlowSign: %d; rhsSign: %d", flowSign, rhsSign);
         }
 
         if((flowSign==0) || (rhsSign==0)) // groups on top of each other and don't move; merge them
@@ -154,7 +152,10 @@ FLSAGeneral::FLSAGeneral(int highestNodeNum, SEXP connList, SEXP startValues, SE
     maxGroupNumber = INTEGER(maxGrpNum)[0];
     // set up the initial groups
     // graph.printGraph(cout);
-    
+
+    mfgraphSize.clear();
+    mfgraphIter.clear();
+
     initializeGroups(startValues);
     
     // insert the events of the first groups into the scheduler
@@ -234,7 +235,6 @@ void FLSAGeneral::doMerging(double lambda, int grp1, int grp2)
         MaxFlowGraph* m;
         int newGroupNum;
         set<int>::iterator setIter;
-        scheduleEvent schedEv;
 
         // get the nodes in the two groups
         foo = groups.getGroup(grp1);
@@ -277,7 +277,11 @@ void FLSAGeneral::doTension(double lambda, int grp, bool update)
         // do not do any tension updates if the group size is too large
         if(showProgress)
         {
-            Rprintf("Lambda: %f Action: T Group: %d Size: %d\n",lambda, grp, curGroupItem.m->size());
+            Rprintf("Lambda: %.16f Action: T Group: %d Size: %d\n",lambda, grp, curGroupItem.m->size());
+            if(grp > 100000 && curGroupItem.m->size() > 4000) {
+	      Rprintf("Update: %d\n", update);
+            }
+
         }
        if(curGroupItem.m->size()<=maxSizeForSplitCheck)
         {
@@ -285,10 +289,19 @@ void FLSAGeneral::doTension(double lambda, int grp, bool update)
             if(update)
             {
                 hitTime = curGroupItem.m->calcTensionChangeUpdate(lambda);
+                if(showProgress && grp > 100000 && curGroupItem.m->size() > 4000) {
+                Rprintf("Hittime: %.16f\n", hitTime);
+                }
             }
             else
             {
-                hitTime = curGroupItem.m->calcTensionChangeProportional(lambda);
+                int numIterNeeded;
+                hitTime = curGroupItem.m->calcTensionChangeProportional(lambda, numIterNeeded);
+                if(showProgress && grp > 100000 && curGroupItem.m->size() > 4000) {
+                Rprintf("Hittime: %.16f\n", hitTime);
+                }
+                mfgraphSize.push_back(curGroupItem.m->size());
+                mfgraphIter.push_back(numIterNeeded);
             }
  
             // check the different possibilities for the hitTime
@@ -298,6 +311,11 @@ void FLSAGeneral::doTension(double lambda, int grp, bool update)
             }
             else if(hitTime==splitNow) // make the split and schedule the new events
             {
+                if(showProgress) { 
+                    if(grp > 100000 && curGroupItem.m->size() > 4000) {
+		      Rprintf("Decided ot split\n");
+                    }
+                }
                 split(lambda, grp);
                 return;
             }
@@ -319,11 +337,6 @@ void FLSAGeneral::split(double lambda, int grp)
 {
 //    outStream << "Just started in Split" << endl;
     // get the group that is to be split
-    if(showProgress)
-    {
-        Rprintf("Lambda: %f Action: Split Group: %d\n",lambda, grp);
-    }
-
     
     groupItem groupToSplit = groups.getGroup(grp);
     
@@ -351,23 +364,59 @@ void FLSAGeneral::split(double lambda, int grp)
     // Schedule all possible future merge events
     scheduleMergeEvents(newGroupNums.first, connGroups1);
     scheduleMergeEvents(newGroupNums.second, connGroups2);
+    if(showProgress)
+    {
+        Rprintf("Lambda: %f Action: Split Group: %d, Sizes: %d,%d\n",lambda, grp, splitNodes1.size(), splitNodes2.size());
+    }
+
     
     // update the tensions in the groups
     doTension(lambda, newGroupNums.first, false);
     doTension(lambda, newGroupNums.second, false);
+
 }
 
 
 
 SEXP FLSAGeneral::solution(SEXP nodes, SEXP lambdas)
 {
-    return(groups.solution(nodes,lambdas));
+    SEXP sol;
+    PROTECT(sol = groups.solution(nodes, lambdas));
+    SEXP sizeVec, iterVec;
+    PROTECT(sizeVec = allocVector(INTSXP,mfgraphSize.size()));
+    for(int i =0; i < mfgraphSize.size(); ++i) {
+        INTEGER(sizeVec)[i] = mfgraphSize[i];
+    }
+    PROTECT(iterVec = allocVector(INTSXP, mfgraphIter.size())); 
+    for(int i = 0; i < mfgraphIter.size(); ++i) {
+        INTEGER(iterVec)[i] = mfgraphIter[i];
+    }
+
+    setAttrib(sol, install("sizeMFG"), sizeVec);
+    setAttrib(sol, install("iterMFG"), iterVec);
+    UNPROTECT(3);
+    return(sol);
 }
 
 
 SEXP FLSAGeneral::solutionGraph()
 {
-    return(groups.getSolutionObject());
+    SEXP sol;
+    PROTECT(sol = groups.getSolutionObject());
+    SEXP sizeVec, iterVec;
+    PROTECT(sizeVec = allocVector(INTSXP,mfgraphSize.size()));
+    for(int i =0; i < mfgraphSize.size(); ++i) {
+        INTEGER(sizeVec)[i] = mfgraphSize[i];
+    }
+    PROTECT(iterVec = allocVector(INTSXP, mfgraphIter.size())); 
+    for(int i = 0; i < mfgraphIter.size(); ++i) {
+        INTEGER(iterVec)[i] = mfgraphIter[i];
+    }
+
+    setAttrib(sol, install("sizeMFG"), sizeVec);
+    setAttrib(sol, install("iterMFG"), iterVec);
+    UNPROTECT(3);
+    return(sol);
 }
 
 

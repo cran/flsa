@@ -1,11 +1,9 @@
 #include "MaxFlowGraph.h"
 #include <queue>
-#include <fstream>
-#include <sstream>
 #include <R.h>
 #include <Rinternals.h>
 #include "GeneralFunctions.h"
-
+#include <stdlib.h>
 
 void MaxFlowGraph::addEdgeCap(int from, int to, double capacity)
 {
@@ -61,7 +59,7 @@ pair<int,int> MaxFlowGraph::addSpecialSourceSink(const vector<double>& overFlow)
     int newSource = nodes.size();
     int newSink = nodes.size()+1;
     nodes.resize(nodes.size()+2);
-    for(int i=0; i< overFlow.size(); ++i)
+    for(unsigned int i=0; i< overFlow.size(); ++i)
     {
         if(overFlow[i]>0)
         {
@@ -79,7 +77,7 @@ void MaxFlowGraph::removeSpecialSourceSink(const vector<double>& overFlow, const
 {
     int numEdges;
     // first go through all other nodes and delete the appropriate edge, which by construction has to be the last one
-    for(int i=0; i< overFlow.size(); ++i)
+    for(unsigned int i=0; i< overFlow.size(); ++i)
     {
         if(overFlow[i]!=0)
         {
@@ -185,7 +183,7 @@ int MaxFlowGraph::findDist(int nodeNum)
 }
 
 
-void MaxFlowGraph::preprocess(const int sourceNode, const int sinkNode, ostream& outStream, bool output)
+void MaxFlowGraph::preprocess(const int sourceNode, const int sinkNode, bool output)
 {
     // compute the distance label from the sink using the current flow
     dist = distance(sinkNode);
@@ -199,7 +197,7 @@ void MaxFlowGraph::preprocess(const int sourceNode, const int sinkNode, ostream&
     
     if(output)
     {
-        printGraph(outStream);
+        printGraph();
     }
     
     // go through all nodes connected to the source and push the maximum flow
@@ -221,8 +219,8 @@ void MaxFlowGraph::preprocess(const int sourceNode, const int sinkNode, ostream&
     dist[sourceNode] = nodes.size();
     if(output)
     {
-        printGraph(outStream);
-        printActiveNodes(outStream);
+        printGraph();
+        printActiveNodes();
     }
 }
 
@@ -504,10 +502,10 @@ MaxFlowGraph::MaxFlowGraph(const set<int>& graphNodes):nodes(graphNodes.size()+2
 
 // Do the preflow-push algorithm to find the maximal flow, using the currently saved flow;
 // initialization to 0 has to be done seperately by hand
-bool MaxFlowGraph::findMaxFlow(const int sourceNode, const int sinkNode, ostream& outStream, bool output)
+bool MaxFlowGraph::findMaxFlow(const int sourceNode, const int sinkNode, bool output)
 {
     int activeNodeNum;
-    preprocess(sourceNode, sinkNode, outStream, output);
+    preprocess(sourceNode, sinkNode, output);
     while(getLargestActiveNode(activeNodeNum))
     {
         if(pushRelabel(activeNodeNum,sourceNode, sinkNode)) // node remains active; if inactive, does not need to be replaced
@@ -516,8 +514,8 @@ bool MaxFlowGraph::findMaxFlow(const int sourceNode, const int sinkNode, ostream
         }
         if(output)
         {
-            printGraph(outStream);
-            printActiveNodes(outStream);
+            printGraph();
+            printActiveNodes();
         }
     }
 
@@ -525,7 +523,7 @@ bool MaxFlowGraph::findMaxFlow(const int sourceNode, const int sinkNode, ostream
 }
 
 
-double MaxFlowGraph::validUntil(ostream& outStream, bool giveOutput)
+double MaxFlowGraph::validUntil(bool giveOutput)
 {
     MaxFlowNodes::iterator nodeIt;
     MaxFlowNode::iterator edgeIt;
@@ -534,7 +532,6 @@ double MaxFlowGraph::validUntil(ostream& outStream, bool giveOutput)
     double validLambda=infinite;
     double foo, offset;
     
-    outStream.precision(15);
     // go through all edges except those connected to the source or the sink
     for(nodeIt = nodes.begin()+2; nodeIt != nodes.end(); ++nodeIt)
     {
@@ -560,9 +557,7 @@ double MaxFlowGraph::validUntil(ostream& outStream, bool giveOutput)
                         }
                         if(giveOutput)
                         {
-                            
-                            outStream << "From: " << nodeIt-nodes.begin() << " To: " << edgeIt->to <<
-                                    " Value: " << validLambda << endl;
+			  Rprintf("From: %d To: %d Value: %.16f\n", nodeIt-nodes.begin(), edgeIt->to, validLambda);
                         }
                     }
                }
@@ -573,7 +568,6 @@ double MaxFlowGraph::validUntil(ostream& outStream, bool giveOutput)
     {
         validLambda=neverSplit;
     }
-    outStream.precision(5);
     return(validLambda);
 }
 
@@ -623,7 +617,7 @@ void MaxFlowGraph::updateTension(const double newLambda)
 
 
 
-double MaxFlowGraph::calcTensionChange(const double lambda,ostream& outStream, bool giveOutput)
+double MaxFlowGraph::calcTensionChange(const double lambda, bool giveOutput)
 {
     // first update the tensions
     updateTension(lambda);
@@ -643,7 +637,7 @@ double MaxFlowGraph::calcTensionChange(const double lambda,ostream& outStream, b
         setCapacity();
         if(findMaxFlow(source, sink))
         {
-            return(validUntil(outStream, giveOutput));
+            return(validUntil(giveOutput));
         }
         else
         {
@@ -654,9 +648,8 @@ double MaxFlowGraph::calcTensionChange(const double lambda,ostream& outStream, b
 
 
 
-double MaxFlowGraph::calcTensionChangeUpdate(const double lambda, ostream& outStream, bool giveOutput)
+double MaxFlowGraph::calcTensionChangeUpdate(const double lambda, bool giveOutput)
 {
-    stringstream updateOutput;
     // update the tension in the graph
     updateTension(lambda);
     
@@ -670,7 +663,7 @@ double MaxFlowGraph::calcTensionChangeUpdate(const double lambda, ostream& outSt
     // do the maximum flow
     bool result = findMaxFlow(newNodes.first, newNodes.second);
     if(giveOutput) {
-        printGraph(updateOutput);
+        printGraph();
     }
     // remove the new source and sink node
     removeSpecialSourceSink(overFlow, newNodes.first, newNodes.second);
@@ -683,29 +676,15 @@ double MaxFlowGraph::calcTensionChangeUpdate(const double lambda, ostream& outSt
     else // there is no valid maximum flow anymore; call a regular maxFlow from 0 to find out where to split
     {
         setFlowTo0();
-//        ofstream outStream("TestOutput3.txt", ios::out);
         result = findMaxFlow(source, sink);
-        if(result) // this should not happen, stop with an error (can be thrown out later because it should be unncecessary
-        {
-            cout << "Found a possible flow in calcTensionChangeUpdate although deemed impossible" << endl;
-            char foo[256];
-            while(!updateOutput.eof())
-            {
-                updateOutput.getline(foo,256);
-                cout << foo << endl;
-            }
-            cout << "Graph after new flow" << endl << foo << endl;
-
-            printGraph(cout);
-            exit(1);
-        }
         return(splitNow);
     }
 }
 
 
-double MaxFlowGraph::calcTensionChangeProportional(const double lambda,ostream& outStream, bool giveOutput)
+double MaxFlowGraph::calcTensionChangeProportional(const double lambda, int& numIter, bool giveOutput)
 {
+    numIter = 1;
     // first update the tensions
     double currentFlow, currentFactor, deltaFactor, deltaFlow, maxFlow;
     updateTension(lambda);
@@ -728,12 +707,13 @@ double MaxFlowGraph::calcTensionChangeProportional(const double lambda,ostream& 
     setCapacityProportional(currentFactor);
     if(giveOutput)
     {
-        printGraph(outStream);
-        outStream << "Old Flow: " << currentFlow << endl;
-        outStream << "Old Factor: " << currentFactor << endl;
+        printGraph();
+        Rprintf("Old Flow: %f\nOld Factor: %f\n", currentFlow, currentFactor);
     }
+    numIter++;
     while(!findMaxFlow(source, sink))
     {
+        numIter++;
         deltaFlow = currentFlowFromSource(source) - currentFlow;
         currentFlow += deltaFlow;
         // now calculate the new necessary increase in the factor
@@ -741,21 +721,38 @@ double MaxFlowGraph::calcTensionChangeProportional(const double lambda,ostream& 
         currentFactor+=deltaFactor;
         if(giveOutput)
         {
-            outStream << "Current Flow: " << currentFlow << endl;
-            outStream << "current Factor: " << currentFactor << endl;
-            printGraph(outStream);
+	  printGraph();
+	  Rprintf("Old Flow: %f\nOld Factor: %f\n", currentFlow, currentFactor);
         }
         
         if(deltaFlow < tolerance){ // no increase anymore; won't finish
-            return(splitNow);}
+            // have to check first if everything is ok
+            set<int> rfs = reachableFromSource();
+            if(rfs.size() ==size()) {
+                if(giveOutput) {
+		  Rprintf("There is a problem\n");
+                }
+                setFlowTo0();
+                setCapacity();
+                if(findMaxFlow(source, sink)) { // now source nodes at maximum
+                    return(validUntil(giveOutput));
+                }
+                else {
+                    return(splitNow);
+                }
+            }
+            else { // looks like needs to split
+                return(splitNow);
+            }
+        }
         
         setCapacityProportional(currentFactor);
     }
     if(giveOutput)
     {
-        printGraph(outStream);
+        printGraph();
     }
-    return(validUntil(outStream, giveOutput));
+    return(validUntil(giveOutput));
 }
 
 
@@ -767,9 +764,9 @@ set<int> MaxFlowGraph::reachableFromSource(const int sourceNode)
     // reached
 
     // reachable nodes are all nodes in parent except source and sink
-    for(int i=2; i !=distReach.size(); ++i)
+    for(unsigned int i=2; i !=distReach.size(); ++i)
     {
-        if(distReach[i]<nodes.size())
+        if((unsigned int) distReach[i] < nodes.size())
         {
             // node is reachable; insert node in external notation
             reachable.insert(nodeMapIntToExt[i]); 
@@ -823,91 +820,87 @@ void MaxFlowGraph::clear()
 
 MaxFlowGraph::~MaxFlowGraph()
 {
-    // delete all edges go to and from the source and sink nodes
-    deleteAllEdges(source);
-    deleteAllEdges(sink);
-
-    nodeMapExtToInt.clear();
-    nodeMapIntToExt.clear();
-    nodes.clear();
+  // delete all edges go to and from the source and sink nodes
+  deleteAllEdges(source);
+  deleteAllEdges(sink);
+  
+  //  set<int>::iterator setIt;
+  //set<int> allNodesInGraph = allNodes();
+  //for(setIt = allNodesInGraph.begin(); setIt!=allNodesInGraph.end(); ++setIt) {
+  //  Rprintf("Deleting edge %d\n", *setIt);
+    // deleteAllEdges(*setIt);
+  //}
+  //Rprintf("Stopped Deleting edges\n");
+  nodeMapExtToInt.clear();
+  nodeMapIntToExt.clear();
+  nodes.clear();
+  //Rprintf("Finished deleting Maxflowgraph\n");
 }
     
     
-void MaxFlowGraph::printGraph(ostream& outStream)
+void MaxFlowGraph::printGraph()
 {
     int edgeNum, nodeNum;
     MaxFlowEdge me;
     
-    outStream << "Group movement: " << groupDeriv << endl;
-    for(nodeNum = 0; nodeNum != nodes.size(); ++nodeNum)
+    Rprintf("Group movement: %f\n", groupDeriv);
+    for(nodeNum = 0; nodeNum != (int) nodes.size(); ++nodeNum)
     {
         // right name for the node; internal to external mapping with special case for source and sink
         if(nodeNum==source)
         {
-            outStream << "Node Number: Source " << nodeNum << endl;
+	  Rprintf("Node Number: Source %d\n", nodeNum);
         }
         else if(nodeNum==sink)
         {
-            outStream << "Node Number: Sink " << nodeNum << endl;
+          Rprintf("Node Number: Sink %d\n", nodeNum);
         }
         else
         {
-            outStream << "Node Number: " << nodeNum << ", " << nodeMapIntToExt[nodeNum] << endl;
+	  Rprintf("Node Number: %d, %d\n", nodeNum, nodeMapIntToExt[nodeNum]);
         }
         // write the excess flow and the distance
-        outStream << "Excess Flow: "<< exFlow[nodeNum] << " Distance: " << dist[nodeNum] << endl;
+        Rprintf("Excess Flow: %f Distance: %d\n", exFlow[nodeNum], dist[nodeNum]);
         
-        outStream << "Edges:" << endl;
-        for(edgeNum = 0; edgeNum != nodes[nodeNum].size(); ++edgeNum)
+        Rprintf("Edges:\n");
+        for(edgeNum = 0; edgeNum != (int) nodes[nodeNum].size(); ++edgeNum)
         {
             me = nodes[nodeNum][edgeNum];
             if(me.to==source)
             {
-                outStream << "To: Source";
+	      Rprintf("To: Source");
             }
             else if(me.to==sink)
             {
-                outStream << "To: Sink";
+	      Rprintf("To: Sink");
             }
             else
             {
-                outStream << "To: " << me.to;
+	      Rprintf("To: %d", me.to);
             }
-            double bar = me.edgePtr->lambda + ((me.edgePtr->lambda - me.edgePtr->tension)/(me.edgePtr->flow-1));
-            outStream.precision(15);
-            outStream << " Cap: " << me.edgePtr->capacity <<
-                " Flow: " << me.edgePtr->flow << " Tension: " << me.edgePtr->tension << " Lambda: " << 
-                 me.edgePtr->lambda;
+            Rprintf(" Cap: %.14f Flow: %.14f Tension: %.14f Lambda: %.14f", me.edgePtr->capacity, me.edgePtr->flow, me.edgePtr->tension, me.edgePtr->lambda);
 #ifdef _DEBUG2_
-            outStream << "Diff: " << me.edgePtr->tension - me.edgePtr->lambda << 
-                 "Delta:" << ((me.edgePtr->lambda - me.edgePtr->tension)/(me.edgePtr->flow-1))<< "Valid: " << bar <<  "Diff:" << bar - me.edgePtr->lambda << "Eligible: " << (me.edgePtr->flow > 1);
+            Rprintf("Diff: %.14f Delta: %.14f Valid: %.14f Diff: %.14f Eligible %.14f", me.edgePtr->tension - me.edgePtr->lambda, ((me.edgePtr->lambda - me.edgePtr->tension)/(me.edgePtr->flow-1)), bar, bar - me.edgePtr->lambda, (me.edgePtr->flow > 1));
 #endif
-            outStream.precision(5);
-            outStream << endl;
+            Rprintf("\n");
         }
-        outStream << endl;
+        Rprintf("\n");
     }
     
-/*    map<int,int>::iterator MI;
-    for(MI = nodeMapExtToInt.begin(); MI!=nodeMapExtToInt.end(); ++MI)
-    {
-        outStream << MI->first << " " << MI->second << endl;
-    }*/
-    
-    outStream << endl;
+    Rprintf("\n");
 }
 
 
-void MaxFlowGraph::printActiveNodes(ostream& outStream)
+void MaxFlowGraph::printActiveNodes()
 {
-    int i;
+    unsigned int i;
     list<int>::iterator listIt;
     
     for(i=0; i<activeByDist.size(); ++i)
     {
         for(listIt = activeByDist[i].begin(); listIt !=activeByDist[i].end(); ++listIt)
         {
-            outStream << "Dist: " << i << " Node: " << *listIt << endl;
+	  Rprintf("Dist: %d Node: %d\n", i, *listIt);
         }
     }
 }

@@ -11,7 +11,6 @@ double PenaltyGraph::getOutFlow(const set<int>& subNodes)
     Node::iterator edgeIt; // iterate through the edges in each node; check for each if in subgraph
     Nodes::iterator nodeIt; // save the position of the node the algorithm is working on
     double averagePull = 0;
-    Edge *edgePtr, *edgePtrBack;
     
     // go through all the nodes in the subgraph
     for(setIt=subNodes.begin(); setIt!=subNodes.end(); ++setIt)
