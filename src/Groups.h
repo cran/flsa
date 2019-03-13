@@ -4,6 +4,7 @@
 
 #include <set>
 #include <vector>
+#include <memory>
 #include "MaxFlowGraph.h"
 #include <R.h>
 #include <Rinternals.h>
@@ -25,7 +26,7 @@ struct groupItem {
     set<int> splitNodes; // used when splitting; contains the nodes that are split into group1; rest into group2
     int size; // stores the size of the group
     
-    MaxFlowGraph* m; // maxflowgraph that contains the tension information
+    std::shared_ptr<MaxFlowGraph> m; // maxflowgraph that contains the tension information
 };
 
 
@@ -60,15 +61,15 @@ public:
     // add a new group to the data that did not exist before (can only consist of one node)
     // return value is the number of the group (can not be user specified, as this is
     // what the class mainly controls)
-    int addNewGroup(double lambda, double mu, MaxFlowGraph* m, bool initial=false);
+    int addNewGroup(double lambda, double mu, std::shared_ptr<MaxFlowGraph> m, bool initial=false);
     
     // merge two given groups into a new one; return value is the number of the new group
     // maxflowgraphs in old groups will be deleted as the group is set inactive
-    int mergeGroups(int grp1, int grp2, double lambda, MaxFlowGraph* m);
+    int mergeGroups(int grp1, int grp2, double lambda, std::shared_ptr<MaxFlowGraph> m);
     
     // split up a group into 2 new groups; return value is a pair of the new group numbers
     // the first of the pair corresponds to m1, the second to m2
-    pair<int, int> splitGroup(int grp, double lambda, MaxFlowGraph* m1, MaxFlowGraph* m2);
+    pair<int, int> splitGroup(int grp, double lambda, std::shared_ptr<MaxFlowGraph> m1, std::shared_ptr<MaxFlowGraph> m2);
     
     // return a group; it is not being checked that this group actually exists
     inline groupItem getGroup(int grp){ return(groups[grp]);};

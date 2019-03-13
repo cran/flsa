@@ -1,4 +1,4 @@
-useDynLib(flsa)
+useDynLib(flsa, .registration=TRUE)
 export(flsa)
 export(flsaTopDown)
 export(is.connListObj)

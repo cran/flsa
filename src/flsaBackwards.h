@@ -26,8 +26,6 @@ class FLSABackwards {
     double* tauDeriv;
     double* updateLambdaTau;
    
-	SEXP R_solution;
- 
     double* lambdas;
     double curLambda;
 
@@ -71,14 +69,16 @@ public:
     numGroups is a vector with the number of groups desired in the solution
     numSolutions is the length of the numGroups vector
     */
-    FLSABackwards(SEXP R_y, SEXP R_groups, SEXP R_lambdas); // Constructor
+    FLSABackwards(SEXP R_y, SEXP R_groups, SEXP R_lambdas, SEXP R_solution); // Constructor
+    
+    // the destructor
+    ~FLSABackwards();
     
     // run the algorithm
     void runAlgorithm();
     
     // get the solution that has been saved; returns an SEXP matrix
-    void allocateSolutions();
-	SEXP returnSolutions();
+    void allocateSolutions(SEXP R_solution);
     
     void printResults(ostream &out);
     

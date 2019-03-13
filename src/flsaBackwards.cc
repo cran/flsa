@@ -143,7 +143,7 @@ pair<GroupInfo, GroupInfo> FLSABackwards::splitGroup(GroupInfo group) {
 
 
 // Constructor
-FLSABackwards::FLSABackwards(SEXP R_y, SEXP R_groups, SEXP R_lambdas):solGroups(),groups()
+FLSABackwards::FLSABackwards(SEXP R_y, SEXP R_groups, SEXP R_lambdas, SEXP R_solution):solGroups(),groups()
 {
 	// first initialize the variables that we need
     n = LENGTH(R_y);
@@ -175,7 +175,7 @@ FLSABackwards::FLSABackwards(SEXP R_y, SEXP R_groups, SEXP R_lambdas):solGroups(
     curNumSolutions = 0;
     
     // create the memory space for the solutions; these don't need to be initialized
-    allocateSolutions();
+    allocateSolutions(R_solution);
     algRun = false;
     
     // initialize beta, betaDeriv, tau, tauderiv
@@ -224,6 +224,16 @@ FLSABackwards::FLSABackwards(SEXP R_y, SEXP R_groups, SEXP R_lambdas):solGroups(
     for(int i=0; i<n-1; ++i) {
         updateLambdaTau[i]=curLambda;
     }
+}
+
+FLSABackwards::~FLSABackwards() {
+    // delete all the elements that have been allocated in the constructor
+    delete[] beta;
+    delete[] betaDeriv;
+    delete[] updateLambdaBeta;
+    delete[] tau;
+    delete[] tauDeriv;
+    delete[] updateLambdaTau;
 }
 
 // run the algorithm
@@ -281,17 +291,16 @@ void FLSABackwards::runAlgorithm()
 }
     
 // get the solution that has been saved; returns an SEXP matrix
-void FLSABackwards::allocateSolutions()
+void FLSABackwards::allocateSolutions(SEXP R_solution)
 {
-    PROTECT(R_solution = allocVector(VECSXP, 3));
-
     // set the names of the components
-    SEXP names = getAttrib(R_solution, R_NamesSymbol);
-    names = allocVector(STRSXP,3);
+    SEXP names;
+    PROTECT(names = allocVector(STRSXP,3));
     SET_STRING_ELT(names, 0, mkChar("Solution"));
     SET_STRING_ELT(names, 1, mkChar("Lambdas"));
 	SET_STRING_ELT(names, 2, mkChar("isBreakpoint"));
     setAttrib(R_solution, R_NamesSymbol, names);
+    UNPROTECT(1);
     
     // set the matrix with the solutions 
     // and the vector with the values of lambda at the breakpoints
@@ -299,16 +308,10 @@ void FLSABackwards::allocateSolutions()
     SET_VECTOR_ELT(R_solution, 1, allocVector(REALSXP,numSolutions));
     SET_VECTOR_ELT(R_solution, 2, allocVector(LGLSXP,numSolutions));
 
-    // copy the data over
+    // copy the pointer to the vectors over
     solution = REAL(VECTOR_ELT(R_solution,0));
     lambdas = REAL(VECTOR_ELT(R_solution,1));
     isBreakpointVec = LOGICAL(VECTOR_ELT(R_solution,2));
-}
-
-
-SEXP FLSABackwards::returnSolutions() {
-	UNPROTECT(1);
-	return(R_solution);
 }
 
 
@@ -370,13 +373,15 @@ void FLSABackwards::printSolGroups(ostream &out) {
 
 extern "C" {
 SEXP FLSATopDown(SEXP R_y, SEXP R_groups, SEXP R_lambdas) {
-    FLSABackwards flsa(R_y, R_groups, R_lambdas);
+    SEXP R_solution;
+    PROTECT(R_solution = allocVector(VECSXP, 3));
+    
+    FLSABackwards flsa(R_y, R_groups, R_lambdas, R_solution);
     
     flsa.runAlgorithm();
     
-    SEXP R_return = flsa.returnSolutions();
-    
-    return(R_return);
+    UNPROTECT(1);
+    return(R_solution);
 }
 }
 

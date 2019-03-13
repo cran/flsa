@@ -8,7 +8,8 @@
   These functions are the main interface functions for calculating FLSA solutions
 }
 \usage{
-flsa(y, lambda1=0, lambda2=NULL, connListObj = NULL, splitCheckSize=1e+09, verbose=FALSE, thr = 1e-09, maxGrpNum=4*length(y))
+flsa(y, lambda1=0, lambda2=NULL, connListObj = NULL, splitCheckSize=1e+09, 
+    verbose=FALSE, thr = 1e-09, maxGrpNum=4*length(y))
 flsaTopDown(y, lambda1=0, groups=1:length(y), lambda2=NULL)
 flsaGetSolution(solObj, lambda1=0, lambda2=NULL, dim=NULL)
 }
@@ -50,7 +51,8 @@ resSolObj2Dim <- flsa(y2Dim, lambda2=NULL)
 
 res2 <- flsaGetSolution(resSolObj, lambda2=lambda2)
 ### here note that the solution object does not store that the input was 2 dimensional
-### therefore, res2Dim does not give out the solution as a 2 dimensional matrix (unlike the direct version above)
+### therefore, res2Dim does not give out the solution as a 2 
+### dimensional matrix (unlike the direct version above)
 res2Dim2 <- flsaGetSolution(resSolObj2Dim, lambda2=lambda2)
 
 }

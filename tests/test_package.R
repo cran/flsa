@@ -1,2 +1,4 @@
 library(testthat)
-test_package("flsa")
+library(flsa)
+
+test_check("flsa")

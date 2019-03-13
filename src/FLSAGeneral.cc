@@ -10,7 +10,7 @@ void FLSAGeneral::initializeGroups(SEXP startValues)
 {
     // set up the groups
     int numOfNodes = LENGTH(startValues);
-    MaxFlowGraph* m;
+    std::shared_ptr<MaxFlowGraph> m;
     set<int> subNodes;
     
     // print progress report if necessary
@@ -232,7 +232,7 @@ void FLSAGeneral::doMerging(double lambda, int grp1, int grp2)
     {
         set<int> grp1Nodes, grp2Nodes, connGroups;
         groupItem foo;
-        MaxFlowGraph* m;
+        std::shared_ptr<MaxFlowGraph> m;
         int newGroupNum;
         set<int>::iterator setIter;
 
@@ -346,7 +346,7 @@ void FLSAGeneral::split(double lambda, int grp)
     splitNodes2 = groupToSplit.m->getComplement(splitNodes1);
     
     // generate the two new subgraphs
-    MaxFlowGraph *mSplit1, *mSplit2;
+    std::shared_ptr<MaxFlowGraph> mSplit1, mSplit2;
     mSplit1 = graph.subGraph(splitNodes1);
     mSplit2 = graph.subGraph(splitNodes2);
     // do the splitting

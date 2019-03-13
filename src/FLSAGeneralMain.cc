@@ -48,6 +48,7 @@ SEXP FLSAGeneralMain(SEXP connList, SEXP startValues, SEXP lambdas, SEXP maxSpli
         sol =FLSAGeneralObj.solution(nodes, lambdas);
         UNPROTECT(1);
     }
+    
     return(sol);
 };
 

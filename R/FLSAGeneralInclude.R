@@ -101,7 +101,7 @@ flsaTopDown <- function(y, lambda1=0, groups=1:length(y), lambda2=NULL) {
   if(lambda1<0) {
     stop("Lambda1 has to be >=0")
   }
-  res = .Call("FLSATopDown", y, groups, lambda2)
+  res = .Call("FLSATopDown", y, groups, lambda2, PACKAGE="flsa")
   if(lambda1 > 0) {
     res$Solution = softThresholding(res$Solution, lambda1)
   }

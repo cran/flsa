@@ -195,9 +195,9 @@ void PenaltyGraph::subGraphSourceSink(MaxFlowGraph& m, list<pair<int, double> >&
     }
 }
 
-MaxFlowGraph* PenaltyGraph::subGraph(const set<int>& subNodes, const double* const pullAdjustments)
+std::shared_ptr<MaxFlowGraph> PenaltyGraph::subGraph(const set<int>& subNodes, const double* const pullAdjustments)
 {
-    MaxFlowGraph* m = new MaxFlowGraph(subNodes);
+    std::shared_ptr<MaxFlowGraph> m = std::make_shared<MaxFlowGraph>(subNodes);
     list<pair<int,double> >  nodePull; // saves the pull on the nodes; stored with nodeNumbers in internal notation
 
     subGraphGetEdges(*m, nodePull); // remember, nodePull will be changed, so will m

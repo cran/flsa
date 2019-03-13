@@ -12,6 +12,7 @@
 #include <map>
 #include <list>
 #include <iostream>
+#include <memory>
 #include "GeneralFunctions.h"
 #include "GraphDefinitions.h"
 #include "MaxFlowGraph.h"
@@ -50,7 +51,7 @@ public:
     // operations in the MaxFlowGraph are automatically stored in the PenaltyGraph as well
     // pullAdjustments are used when due to a general predictor matrix, the pull on each node can also be influenced
     // by other things except other nodes; the map can store all pulls, not only the ones of the current subgraph
-    MaxFlowGraph* subGraph(const set<int>& subNodes, const double* const pullAdjustments = 0);
+    std::shared_ptr<MaxFlowGraph> subGraph(const set<int>& subNodes, const double* const pullAdjustments = 0);
     
     // get the sign of the flow between two groups of nodes;
     // this function will only look for the first edge that links the two groups of nodes and

@@ -16,7 +16,7 @@ void Groups::inactivateGroup(int grp, double lambda)
     
     groups[grp].active=false;
     groups[grp].endLambda=lambda;
-    delete(groups[grp].m);
+    groups[grp].m = NULL;
 }
 
 
@@ -184,7 +184,7 @@ Groups::Groups(SEXP solution)
 }
 
 
-int Groups::addNewGroup(double lambda, double mu, MaxFlowGraph* m, bool initial)
+int Groups::addNewGroup(double lambda, double mu, std::shared_ptr<MaxFlowGraph> m, bool initial)
 {
     groupItem g;
     // fill out the group item
@@ -195,6 +195,10 @@ int Groups::addNewGroup(double lambda, double mu, MaxFlowGraph* m, bool initial)
     g.m = m;
     g.endLambda=infinite;
     g.size = m->size();
+    g.action='U';
+    g.grp1=-1;
+    g.grp2=-1;
+    g.splitNodes = set<int>();
     
     // include g in the vector
     int groupNum = groups.size();
@@ -208,7 +212,7 @@ int Groups::addNewGroup(double lambda, double mu, MaxFlowGraph* m, bool initial)
 
 
 
-int Groups::mergeGroups(int grp1, int grp2, double lambda, MaxFlowGraph* m)
+int Groups::mergeGroups(int grp1, int grp2, double lambda, std::shared_ptr<MaxFlowGraph> m)
 {
     // inactivate the 2 old groups
     inactivateGroup(grp1,lambda);
@@ -235,7 +239,7 @@ int Groups::mergeGroups(int grp1, int grp2, double lambda, MaxFlowGraph* m)
 
 
 
-pair<int, int> Groups::splitGroup(int grp, double lambda, MaxFlowGraph* m1, MaxFlowGraph* m2)
+pair<int, int> Groups::splitGroup(int grp, double lambda, std::shared_ptr<MaxFlowGraph> m1, std::shared_ptr<MaxFlowGraph> m2)
 {
     // inactivate the old group
     inactivateGroup(grp,lambda);
