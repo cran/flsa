@@ -144,7 +144,7 @@ vector<int> MaxFlowGraph::distance(int start, bool from)
         }
     }
     return(dist);
-};
+}
 
 bool MaxFlowGraph::push(int from, MaxFlowEdge &e, const int sourceNode, const int sinkNode)
 {

@@ -124,7 +124,7 @@ public:
     // returns the derivative for the whole group;
     // is the derivative of the group mu
     inline double getGroupDeriv() {return(groupDeriv);};
-    inline int size() {return(nodes.size()-2);};
+    inline long unsigned int size() {return(nodes.size()-2);};
 
     // destruktor for MaxFlowGraph object
     ~MaxFlowGraph();

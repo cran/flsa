@@ -25,7 +25,7 @@ double PenaltyGraph::getOutFlow(const set<int>& subNodes)
         }
     }
     return(averagePull);
-};
+}
 
 
 
@@ -67,7 +67,7 @@ void PenaltyGraph::addEdge(int from, int to, int sign)
     
     nodes[from][to]=e1;
     nodes[to][from]=e2;
-};
+}
 
 
 
@@ -149,7 +149,7 @@ void PenaltyGraph::subGraphGetEdges(MaxFlowGraph& m, list<pair<int,double> >& no
         nodePull.push_front(foo); // total pull on the node
     }
     m.groupDeriv/=m.nodeMapExtToInt.size(); // calculate the derivate for the group value as the mean of the pulls
-};
+}
 
 void PenaltyGraph::subGraphSourceSink(MaxFlowGraph& m, list<pair<int, double> >& nodePull, const double* const pullAdjustments)
 {

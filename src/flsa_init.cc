@@ -8,7 +8,7 @@ extern "C"
     // declaring functions for exporting
     SEXP FLSA(SEXP y); 
     SEXP FLSAexplicitSolution(SEXP solTree, SEXP lambdaVec); 
-    SEXP FLSAGeneralMain(SEXP connList, SEXP startValues, SEXP lambdas, SEXP maxSplitSize, SEXP thr, SEXP maxGrpNum);
+    SEXP FLSAGeneralMain(SEXP connList, SEXP startValues, SEXP lambdas, SEXP maxSplitSize, SEXP verbose, SEXP thr, SEXP maxGrpNum);
     SEXP FLSAGeneralExplicitSolution(SEXP solObj, SEXP nodes, SEXP lambdas);
     SEXP conn2Dim(SEXP dimensions);
     SEXP FLSATopDown(SEXP, SEXP, SEXP);

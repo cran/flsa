@@ -11,6 +11,6 @@ double maxRDoubleVec(SEXP x);
 
 extern "C" {
 SEXP conn2Dim(SEXP dimensions);
-};
+}
 
 #endif

@@ -69,7 +69,7 @@ void FLSABackwards::updateTau(int from, int to, double lambda) {
 // calculate the deriative of tau
 void FLSABackwards::calcTauDeriv(int from, int to, double betaDeriv) {
     double leftDeriv;
-	bool violated = false;
+    bool violated = false;
     if(from==0) {
         leftDeriv = 0;
     }
@@ -83,7 +83,7 @@ void FLSABackwards::calcTauDeriv(int from, int to, double betaDeriv) {
     for(int i=from; i<to; ++i) {
         leftDeriv-=betaDeriv;
         tauDeriv[i]=leftDeriv;
-   		if(tauDeriv[i]<-1 || tauDeriv[i]>1) {
+   		if(tauDeriv[i]< -1 || tauDeriv[i]>1) {
 			violated = true; 
 		}
 	}

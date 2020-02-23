@@ -38,7 +38,7 @@ void FLSAClass::addConnection(int grpOne, int grpTwo, double lambda)
             groupMove.insert(make_pair(lambdaCorr + lambda, conn));
         }
     }
-};
+}
 
 
 vector<int> FLSAClass::getNeighbours(int grpNum, int exclGrp)
@@ -176,7 +176,7 @@ FLSAClass::FLSAClass(SEXP yR)
     {
         addConnection(i,i+1, 0);
     }
-};
+}
 
 
 void FLSAClass::mergeGroups(int grpOne, int grpTwo, double lambda)
@@ -290,7 +290,7 @@ SEXP FLSAClass::solutionTree()
     // unprotect and return
     UNPROTECT(1);
     return(solTree);
-};
+}
 
 /*
 void FLSAClass::printGroupVec()
@@ -372,7 +372,7 @@ SEXP FLSA(SEXP y)
     
     return(res);
 
-};
+}
 
 
 /******************************************************
@@ -427,7 +427,7 @@ SEXP FLSAexplicitSolution(SEXP solTree, SEXP lambdaR)
     // unprotect and return
     UNPROTECT(1);
     return(resMat); // naming of rows and columns can be performed in R itself, easier there
-};
+}
 
 
 }

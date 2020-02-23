@@ -65,7 +65,7 @@ SEXP conn2Dim(SEXP dimensions)
     
     UNPROTECT(1);
     return(conn);
-};
+}
 
 int maxRIntVec(SEXP x)
 {

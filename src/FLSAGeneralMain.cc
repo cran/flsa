@@ -50,7 +50,7 @@ SEXP FLSAGeneralMain(SEXP connList, SEXP startValues, SEXP lambdas, SEXP maxSpli
     }
     
     return(sol);
-};
+}
 
 
 SEXP FLSAGeneralExplicitSolution(SEXP solObj, SEXP nodes, SEXP lambdas)
@@ -59,5 +59,5 @@ SEXP FLSAGeneralExplicitSolution(SEXP solObj, SEXP nodes, SEXP lambdas)
     return(groups.solution(nodes, lambdas));
 }
 
-}; // end of extern C
+} // end of extern C
 

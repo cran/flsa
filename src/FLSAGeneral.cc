@@ -261,7 +261,7 @@ void FLSAGeneral::doMerging(double lambda, int grp1, int grp2)
         doTension(lambda, newGroupNum, false);
     
     }
-};
+}
 
 
 
@@ -283,7 +283,7 @@ void FLSAGeneral::doTension(double lambda, int grp, bool update)
             }
 
         }
-       if(curGroupItem.m->size()<=maxSizeForSplitCheck)
+       if((long) curGroupItem.m->size()<=maxSizeForSplitCheck)
         {
             // for this group, first initiate a tension change calculation
             if(update)
@@ -384,11 +384,11 @@ SEXP FLSAGeneral::solution(SEXP nodes, SEXP lambdas)
     PROTECT(sol = groups.solution(nodes, lambdas));
     SEXP sizeVec, iterVec;
     PROTECT(sizeVec = allocVector(INTSXP,mfgraphSize.size()));
-    for(int i =0; i < mfgraphSize.size(); ++i) {
+    for(long unsigned int i =0; i < mfgraphSize.size(); ++i) {
         INTEGER(sizeVec)[i] = mfgraphSize[i];
     }
     PROTECT(iterVec = allocVector(INTSXP, mfgraphIter.size())); 
-    for(int i = 0; i < mfgraphIter.size(); ++i) {
+    for(long unsigned int i = 0; i < mfgraphIter.size(); ++i) {
         INTEGER(iterVec)[i] = mfgraphIter[i];
     }
 
@@ -405,11 +405,11 @@ SEXP FLSAGeneral::solutionGraph()
     PROTECT(sol = groups.getSolutionObject());
     SEXP sizeVec, iterVec;
     PROTECT(sizeVec = allocVector(INTSXP,mfgraphSize.size()));
-    for(int i =0; i < mfgraphSize.size(); ++i) {
+    for(long unsigned int i =0; i < mfgraphSize.size(); ++i) {
         INTEGER(sizeVec)[i] = mfgraphSize[i];
     }
     PROTECT(iterVec = allocVector(INTSXP, mfgraphIter.size())); 
-    for(int i = 0; i < mfgraphIter.size(); ++i) {
+    for(long unsigned int i = 0; i < mfgraphIter.size(); ++i) {
         INTEGER(iterVec)[i] = mfgraphIter[i];
     }
 
