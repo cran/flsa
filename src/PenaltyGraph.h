@@ -11,13 +11,18 @@
 #include <vector>
 #include <map>
 #include <list>
-#include <iostream>
 #include <memory>
 #include "GeneralFunctions.h"
 #include "GraphDefinitions.h"
 #include "MaxFlowGraph.h"
 #include <R.h>
 #include <Rinternals.h>
+#include "debug.h"
+
+
+#ifdef _FLSA_DEBUG
+#include <iostream>
+#endif
 
 using namespace std;
 
@@ -77,8 +82,10 @@ public:
     // get a set with all the nodes
     set<int> allNodes();
     
+#ifdef _FLSA_DEBUG
     // prints out the whole graph; used for troubleshooting
     void printGraph(ostream& outStream);
+#endif
 };
 
 #endif

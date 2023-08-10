@@ -1,9 +1,9 @@
-#include "MaxFlowGraph.h"
+#include <stdlib.h>
 #include <queue>
 #include <R.h>
 #include <Rinternals.h>
 #include "GeneralFunctions.h"
-#include <stdlib.h>
+#include "MaxFlowGraph.h"
 
 void MaxFlowGraph::addEdgeCap(int from, int to, double capacity)
 {

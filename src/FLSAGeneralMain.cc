@@ -1,4 +1,4 @@
-#include <iostream>
+#include <set>
 #include <fstream>
 #include <R.h>
 #include <Rinternals.h>
@@ -6,7 +6,6 @@
 #include "PenaltyGraph.h"
 #include "MaxFlowGraph.h"
 #include "Groups.h"
-#include <set>
 #include "FLSAGeneral.h"
 #include "helperFuncsSEXP.h"
 

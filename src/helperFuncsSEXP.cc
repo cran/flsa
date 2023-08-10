@@ -1,6 +1,6 @@
+#include <list>
 #include "helperFuncsSEXP.h"
 #include "GeneralFunctions.h"
-#include <list>
 
 using namespace std;
 

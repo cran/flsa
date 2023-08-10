@@ -1,4 +1,3 @@
-#include <iostream>
 #include "Scheduler.h"
 
 void Scheduler::insertEvent(double lambda, const scheduleEvent &e)
@@ -40,7 +39,8 @@ void Scheduler::clearSchedule()
 
 
 
-
+#ifdef _FLSA_DEBUG
+#include <iostream>
 void Scheduler::printSchedule(ostream& outStream)
 {
     multimap<double, scheduleEvent>::iterator iter;
@@ -52,3 +52,4 @@ void Scheduler::printSchedule(ostream& outStream)
     }
     outStream << endl;
 }
+#endif

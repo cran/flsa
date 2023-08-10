@@ -1,6 +1,7 @@
-#include "flsaBackwards.h"
 #include<limits>
 #include<algorithm>
+#include "flsaBackwards.h"
+#include "debug.h"
 
 // utility function for finding the maximum
 
@@ -314,7 +315,7 @@ void FLSABackwards::allocateSolutions(SEXP R_solution)
     isBreakpointVec = LOGICAL(VECTOR_ELT(R_solution,2));
 }
 
-
+#ifdef _FLSA_DEBUG
 void FLSABackwards::printResults(ostream &out) {
     out << "--------------------------------------------------" << endl;
     out << "y:";
@@ -367,7 +368,7 @@ void FLSABackwards::printSolGroups(ostream &out) {
     }
     out << endl;
 }
-
+#endif
 
 // interface function to R
 

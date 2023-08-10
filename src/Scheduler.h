@@ -2,6 +2,7 @@
 #define _SCHEDULER_
 #include <map>
 #include "GeneralFunctions.h"
+#include "debug.h"
 
 using namespace std;
 
@@ -31,8 +32,10 @@ public:
     // clears the whole scheduler of all events
     void clearSchedule();
     
+#ifdef _FLSA_DEBUG
     // this function prints the whole schedule on the screen; mainly for diagonostic purposes
     void printSchedule(ostream& outStream);
+#endif
     
 };
 
