@@ -2,15 +2,9 @@
 #include <map>
 #include <set>
 #include <utility>
-
-
+#include <iostream>
 #include <Rinternals.h>
 #include <R.h>
-#include "debug.h"
-
-#ifdef _FLSA_DEBUG
-#include <iostream>
-#endif
 
 using namespace std;
 
@@ -85,8 +79,7 @@ public:
     
     // get the solution that has been saved; returns an SEXP matrix
     void allocateSolutions(SEXP R_solution);
-   
-#ifdef _FLSA_DEBUG
+    
     void printResults(ostream &out);
     
     void printVector(ostream &out, double* x, int len);
@@ -94,6 +87,5 @@ public:
     void printGroups(ostream &out);
     
     void printSolGroups(ostream &out);
-#endif
 };
 

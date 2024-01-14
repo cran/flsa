@@ -1,6 +1,6 @@
-#include <vector>
 #include "PenaltyGraph.h"
 //#include "Groups.h"
+#include <vector>
 
 
 // this is being calculated by summing over all the flows in this set of nodes. Flows inside the group will
@@ -231,7 +231,7 @@ int PenaltyGraph::flowSignBetweenGroups(const set<int>& nodes1, const set<int>& 
 }
 
 
-#ifdef _FLSA_DEBUG
+
 void PenaltyGraph::printGraph(ostream& outStream)
 {
     Node::iterator edgeIt; // iterator over the edges
@@ -251,7 +251,6 @@ void PenaltyGraph::printGraph(ostream& outStream)
     }
     outStream << endl;
 }
-#endif
 
 PenaltyGraph::PenaltyGraph(SEXP connList, SEXP startValue)
 {

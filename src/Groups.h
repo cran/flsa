@@ -8,7 +8,7 @@
 #include "MaxFlowGraph.h"
 #include <R.h>
 #include <Rinternals.h>
-#include "debug.h"
+
 
 using namespace std;
 
@@ -85,10 +85,8 @@ public:
     // returns a matrix 
     SEXP solution(SEXP nodes, SEXP lambdas);
 
-#ifdef _FLSA_DEBUG
     // print all the data in all the groups; will be useful for debugging
     void printGroups(ostream& outStream);
-#endif
 
     inline int size() {return(groups.size());};
 };

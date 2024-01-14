@@ -1,7 +1,7 @@
-#include <vector>
-#include <map>
 #include <R.h>
 #include <Rinternals.h>
+#include <vector>
+#include <map>
 
 using namespace std;
 

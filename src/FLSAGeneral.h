@@ -10,12 +10,12 @@
 #ifndef _FLSAGENERAL_
 #define _FLSAGENERAL_
 
-#include <vector>
-#include <set>
 #include "PenaltyGraph.h"
 #include "MaxFlowGraph.h"
 #include "Scheduler.h"
 #include "Groups.h"
+#include <vector>
+#include <set>
 
 
 const double neverHit=-1;

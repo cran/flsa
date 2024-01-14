@@ -5,6 +5,7 @@
 #include <R_ext/Utils.h>
 #include "FLSAGeneral.h"
 #include "MaxFlowGraph.h"
+#include <inttypes.h>
 
 void FLSAGeneral::initializeGroups(SEXP startValues)
 {
@@ -245,7 +246,7 @@ void FLSAGeneral::doMerging(double lambda, int grp1, int grp2)
         // print a status message
         if(showProgress)
         {
-            Rprintf("Lambda: %f Action: M Groups: %d, %d Sizes: %d, %d\n",lambda, grp1, grp2, grp1Nodes.size(), grp2Nodes.size());
+            Rprintf("Lambda: %f Action: M Groups: %d, %d Sizes: %" PRIu64 ", %" PRIu64 "\n",lambda, grp1, grp2, grp1Nodes.size(), grp2Nodes.size());
         }
         
         // merge the nodes and get the new subgraph and set up the new group
@@ -277,7 +278,7 @@ void FLSAGeneral::doTension(double lambda, int grp, bool update)
         // do not do any tension updates if the group size is too large
         if(showProgress)
         {
-            Rprintf("Lambda: %.16f Action: T Group: %d Size: %d\n",lambda, grp, curGroupItem.m->size());
+            Rprintf("Lambda: %.16f Action: T Group: %d Size: %lu \n",lambda, grp, curGroupItem.m->size());
             if(grp > 100000 && curGroupItem.m->size() > 4000) {
 	      Rprintf("Update: %d\n", update);
             }
@@ -366,7 +367,7 @@ void FLSAGeneral::split(double lambda, int grp)
     scheduleMergeEvents(newGroupNums.second, connGroups2);
     if(showProgress)
     {
-        Rprintf("Lambda: %f Action: Split Group: %d, Sizes: %d,%d\n",lambda, grp, splitNodes1.size(), splitNodes2.size());
+        Rprintf("Lambda: %f Action: Split Group: %d, Sizes: %" PRIu64 ",%" PRIu64 "\n",lambda, grp, splitNodes1.size(), splitNodes2.size());
     }
 
     

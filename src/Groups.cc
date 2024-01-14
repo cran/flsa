@@ -1,3 +1,4 @@
+#include <iostream>
 #include "Groups.h"
 #include "GeneralFunctions.h"
 
@@ -383,8 +384,7 @@ SEXP Groups::solution(SEXP nodes, SEXP lambdas)
     return(sol);
 }
 
-#ifdef _FLSA_DEBUG
-#include <iostream>
+
 void Groups::printGroups(ostream& outStream)
 {
     //print the initial mapping between the nodes and the groups
@@ -424,4 +424,3 @@ void Groups::printGroups(ostream& outStream)
         outStream << "---------------------------------------------------------------------" << endl;
     }
 }
-#endif

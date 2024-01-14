@@ -1,13 +1,13 @@
 #ifndef _MAXFLOWGRAPH_
 #define _MAXFLOWGRAPH_
 
+#include <iostream>
 #include <utility>
 #include <list>
 #include <set>
 #include <vector>
 #include "GraphDefinitions.h"
 #include "GeneralFunctions.h"
-#include "debug.h"
 
 const double neverSplit=-1;
 const double splitNow=-2;
@@ -133,6 +133,7 @@ public:
     void printGraph();
     // prints the currently active nodes
     void printActiveNodes();
+    
 };
 
 #endif
