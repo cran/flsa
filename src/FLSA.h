@@ -1,7 +1,8 @@
-#include <R.h>
-#include <Rinternals.h>
+#define R_NO_REMAP
 #include <vector>
 #include <map>
+#include <R.h>
+#include <Rinternals.h>
 
 using namespace std;
 

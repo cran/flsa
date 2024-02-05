@@ -9,6 +9,7 @@
 *********************************************************************/
 #ifndef _FLSAGENERAL_
 #define _FLSAGENERAL_
+#define R_NO_REMAP
 
 #include "PenaltyGraph.h"
 #include "MaxFlowGraph.h"

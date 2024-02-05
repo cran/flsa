@@ -7,6 +7,8 @@
 #ifndef _PENALTYGRAPH_
 #define _PENALTYGRAPH_
 
+#define R_NO_REMAP
+
 #include <set>
 #include <vector>
 #include <map>

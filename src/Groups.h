@@ -1,6 +1,7 @@
 #ifndef _GROUPS_
 #define _GROUPS_
 
+#define R_NO_REMAP
 
 #include <set>
 #include <vector>

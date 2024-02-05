@@ -1,10 +1,10 @@
+#define R_NO_REMAP
 #include "MaxFlowGraph.h"
 #include <queue>
 #include <R.h>
 #include <Rinternals.h>
 #include "GeneralFunctions.h"
 #include <stdlib.h>
-#include <inttypes.h>
 
 void MaxFlowGraph::addEdgeCap(int from, int to, double capacity)
 {
@@ -558,7 +558,7 @@ double MaxFlowGraph::validUntil(bool giveOutput)
                         }
                         if(giveOutput)
                         {
-			  Rprintf("From: %" PRIu64 " To: %d Value: %.16f\n", nodeIt-nodes.begin(), edgeIt->to, validLambda);
+			  Rprintf("From: %lu To: %d Value: %.16f\n", (unsigned long) (nodeIt-nodes.begin()), edgeIt->to, validLambda);
                         }
                     }
                }

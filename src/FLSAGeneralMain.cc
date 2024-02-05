@@ -1,3 +1,5 @@
+#define R_NO_REMAP
+
 #include <iostream>
 #include <fstream>
 #include <R.h>
@@ -41,7 +43,7 @@ SEXP FLSAGeneralMain(SEXP connList, SEXP startValues, SEXP lambdas, SEXP maxSpli
     else
     {
         SEXP nodes;
-        PROTECT(nodes = allocVector(INTSXP, highNode+1));
+        PROTECT(nodes = Rf_allocVector(INTSXP, highNode+1));
         for(int i=0; i<=highNode; ++i) {
             INTEGER(nodes)[i]=i;
         }

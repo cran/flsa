@@ -1,3 +1,4 @@
+#define R_NO_REMAP
 #include <fstream>
 #include <vector>
 #include <R.h>
@@ -5,7 +6,6 @@
 #include <R_ext/Utils.h>
 #include "FLSAGeneral.h"
 #include "MaxFlowGraph.h"
-#include <inttypes.h>
 
 void FLSAGeneral::initializeGroups(SEXP startValues)
 {
@@ -198,7 +198,7 @@ void FLSAGeneral::runAlgorithm()
     }
     if(groups.size() >= maxGroupNumber) 
     {
-        error("Number of groups too large. Try increasing the tolerance!\n");
+        Rf_error("Number of groups too large. Try increasing the tolerance!\n");
     }
 }
 
@@ -246,7 +246,7 @@ void FLSAGeneral::doMerging(double lambda, int grp1, int grp2)
         // print a status message
         if(showProgress)
         {
-            Rprintf("Lambda: %f Action: M Groups: %d, %d Sizes: %" PRIu64 ", %" PRIu64 "\n",lambda, grp1, grp2, grp1Nodes.size(), grp2Nodes.size());
+            Rprintf("Lambda: %f Action: M Groups: %d, %d Sizes: %lu, %lu\n",lambda, grp1, grp2, (unsigned long) grp1Nodes.size(), (unsigned long) grp2Nodes.size());
         }
         
         // merge the nodes and get the new subgraph and set up the new group
@@ -367,7 +367,7 @@ void FLSAGeneral::split(double lambda, int grp)
     scheduleMergeEvents(newGroupNums.second, connGroups2);
     if(showProgress)
     {
-        Rprintf("Lambda: %f Action: Split Group: %d, Sizes: %" PRIu64 ",%" PRIu64 "\n",lambda, grp, splitNodes1.size(), splitNodes2.size());
+        Rprintf("Lambda: %f Action: Split Group: %d, Sizes: %lu, %lu\n",lambda, grp, (unsigned long) splitNodes1.size(), (unsigned long) splitNodes2.size());
     }
 
     
@@ -384,17 +384,17 @@ SEXP FLSAGeneral::solution(SEXP nodes, SEXP lambdas)
     SEXP sol;
     PROTECT(sol = groups.solution(nodes, lambdas));
     SEXP sizeVec, iterVec;
-    PROTECT(sizeVec = allocVector(INTSXP,mfgraphSize.size()));
+    PROTECT(sizeVec = Rf_allocVector(INTSXP,mfgraphSize.size()));
     for(long unsigned int i =0; i < mfgraphSize.size(); ++i) {
         INTEGER(sizeVec)[i] = mfgraphSize[i];
     }
-    PROTECT(iterVec = allocVector(INTSXP, mfgraphIter.size())); 
+    PROTECT(iterVec = Rf_allocVector(INTSXP, mfgraphIter.size())); 
     for(long unsigned int i = 0; i < mfgraphIter.size(); ++i) {
         INTEGER(iterVec)[i] = mfgraphIter[i];
     }
 
-    setAttrib(sol, install("sizeMFG"), sizeVec);
-    setAttrib(sol, install("iterMFG"), iterVec);
+    Rf_setAttrib(sol, Rf_install("sizeMFG"), sizeVec);
+    Rf_setAttrib(sol, Rf_install("iterMFG"), iterVec);
     UNPROTECT(3);
     return(sol);
 }
@@ -405,17 +405,17 @@ SEXP FLSAGeneral::solutionGraph()
     SEXP sol;
     PROTECT(sol = groups.getSolutionObject());
     SEXP sizeVec, iterVec;
-    PROTECT(sizeVec = allocVector(INTSXP,mfgraphSize.size()));
+    PROTECT(sizeVec = Rf_allocVector(INTSXP,mfgraphSize.size()));
     for(long unsigned int i =0; i < mfgraphSize.size(); ++i) {
         INTEGER(sizeVec)[i] = mfgraphSize[i];
     }
-    PROTECT(iterVec = allocVector(INTSXP, mfgraphIter.size())); 
+    PROTECT(iterVec = Rf_allocVector(INTSXP, mfgraphIter.size())); 
     for(long unsigned int i = 0; i < mfgraphIter.size(); ++i) {
         INTEGER(iterVec)[i] = mfgraphIter[i];
     }
 
-    setAttrib(sol, install("sizeMFG"), sizeVec);
-    setAttrib(sol, install("iterMFG"), iterVec);
+    Rf_setAttrib(sol, Rf_install("sizeMFG"), sizeVec);
+    Rf_setAttrib(sol, Rf_install("iterMFG"), iterVec);
     UNPROTECT(3);
     return(sol);
 }

@@ -1,6 +1,8 @@
 #ifndef _HELPERFUNCSSEXP_
 #define _HELPERFUNCSSEXP_
 
+#define R_NO_REMAP
+
 #include <R.h>
 #include <Rinternals.h>
 #include <Rdefines.h>
